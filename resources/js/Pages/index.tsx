@@ -50,11 +50,11 @@ export default function Index({
     laravelVersion,
     phpVersion,
 }: PageProps<{ laravelVersion: string; phpVersion: string }>) {
-    const [markers, setMarkers] = useState([]);
+    const [markers, setMarkers] = useState<any[]>([]);
 
     useEffect(() => {
-        window.Pusher = Pusher;
-        window.Echo = new Echo({
+        (window as any).Pusher = Pusher;
+        (window as any).Echo = new Echo({
             broadcaster: "reverb",
             key: import.meta.env.VITE_REVERB_APP_KEY,
             wsHost: import.meta.env.VITE_REVERB_HOST,
@@ -65,10 +65,13 @@ export default function Index({
             enabledTransports: ["ws", "wss"],
         });
 
-        window.Echo.channel("positions").listen("PositionSent", (event) => {
-            const newMarker = JSON.parse(event.data);
-            setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
-        });
+        (window as any).Echo.channel("positions").listen(
+            "PositionSent",
+            (event: { data: string }) => {
+                const newMarker = JSON.parse(event.data);
+                setMarkers((prevMarkers) => [...prevMarkers, newMarker]);
+            }
+        );
     }, []);
 
     function sendCreate() {
@@ -92,6 +95,7 @@ export default function Index({
                 center={[0, 0.0]}
                 zoom={3}
                 maxZoom={5}
+                minZoom={2}
                 scrollWheelZoom={true}
                 crs={customCrs}
             >
